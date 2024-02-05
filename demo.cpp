@@ -1,3 +1,5 @@
+//g++ demo.cpp sources/icon.res -o demo.exe 修改exe图标
+
 #include"cube.cpp"
 
 #include<string>
@@ -7,7 +9,8 @@ using namespace std;
 class Cubedemo{
     public:
         void printCommandList(){
-            cout<<"\n[*]v-cube  --made by "<<"\033[34m"<<"xz"<<"\033[0m\n"<<"(github name:"<<"\033[34m"<<"666xz666"<<"\033[0m"<<")\n"<<endl;
+            cout<<"\n[*]v-cube  --made by "<<"\033[34m"<<"xz"<<"\033[0m\n"<<"(github name:"<<"\033[34m"<<"666xz666"<<"\033[0m"<<")"<<endl;
+            cout<<"https://github.com/666xz666/333cube/tree/v1.0.0 (Click to star)\n"<<endl;
             cout<<"\033[31m"<<"**commandlist**"<<"\033[0m\n"<<endl;
             cout<<"\"commandlist\""<<":"<<"Show commandlist\n"<<endl;
             cout<<"\"clear\""<<":"<<"Clear command line\n"<<endl;

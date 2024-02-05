@@ -369,7 +369,8 @@ class Cube{
             //清空
             cout << "\033c";
 
-            cout<<"\n[*]v-cube  --made by "<<"\033[34m"<<"xz"<<"\033[0m\n"<<"(github name:"<<"\033[34m"<<"666xz666"<<"\033[0m"<<")\n"<<endl;
+            cout<<"\n[*]v-cube  --made by "<<"\033[34m"<<"xz"<<"\033[0m"<<"(github name:"<<"\033[34m"<<"666xz666"<<"\033[0m"<<")"<<endl;
+            cout<<"https://github.com/666xz666/333cube/tree/v1.0.0 (Click to star)\n"<<endl;
             int j=0;
             cout <<"      "; displayColor(layers[j]->c[2]->color[layers[j]]); cout << " "; displayColor(layers[j]->e[2]->color[layers[j]]); cout << " "; displayColor(layers[j]->c[1]->color[layers[j]]); cout << "\n";
             cout <<"      "; displayColor(layers[j]->e[3]->color[layers[j]]); cout << " "; displayColor(layers[j]->center_color);           cout << " "; displayColor(layers[j]->e[1]->color[layers[j]]); cout << "\n";
