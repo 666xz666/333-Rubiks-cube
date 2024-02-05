@@ -30,7 +30,7 @@
         {
             "type": "cppbuild",
             "label": "C/C++: g++.exe build active file",
-            "command": "D:/Program Files (x86)/MinGW/bin/g++.exe",
+            "command": "D:/MinGW/bin/g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
@@ -39,7 +39,7 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
-                "cwd": "D:/Program Files (x86)/MinGW/bin"
+                "cwd": "D:/MinGW/bin"
             },
             "problemMatcher": [
                 "$gcc"
