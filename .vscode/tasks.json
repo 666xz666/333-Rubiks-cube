@@ -36,7 +36,7 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}/bin/${fileBasenameNoExtension}.exe"//修改exe文件生成的位置
             ],
             "options": {
                 "cwd": "D:/MinGW/bin"
