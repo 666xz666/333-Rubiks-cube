@@ -1,5 +1,4 @@
-
-# v-cube
+# [v-cube](https://github.com/666xz666/333cube)
 made by xz
 (github name: 666xz666)
 
