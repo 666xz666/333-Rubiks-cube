@@ -169,38 +169,103 @@ class Cube{
                 layer->c[j]->color[layer->l[j]]       = corner_colors_l[(j + (direction ? 3 : 1)) % 4];
                 layer->c[j]->color[layer->l[(j+1)%4]] = corner_colors_r[(j + (direction ? 3 : 1)) % 4];
             }
+            //display();交给rotateWCA函数显示
+        }
 
-            display();
+        // 旋转整个魔方
+        void rotateWholeCube(char axis, bool direction) {
+         
+            vector<int> l_index(4),e1_index(4),e2_index(4);
+            vector<char> cen_color(4),e1_color(4),e2_color(4);
+            switch(axis) {
+                case 'X': 
+                    rotate(1, !direction);
+                    rotate(3, direction);
+                    l_index = {5,2,0,4}; 
+                    e1_index={0,0,0,2};
+                    e2_index={2,2,2,0};
+                    break;
+                case 'Y': 
+                    rotate(0, direction);
+                    rotate(5, !direction);
+                    l_index = {4,3,2,1}; 
+                    e1_index={1,1,1,1};
+                    e2_index={3,3,3,3};
+                    break;
+                case 'Z': 
+                    rotate(2, direction);
+                    rotate(4, !direction);
+                    display();
+                    l_index = {0,3,5,1}; 
+                    e1_index={3,2,1,0};
+                    e2_index={1,0,3,2};
+                    break;
+            }
+
+            //保存颜色
+            for(int i=0;i<4;i++){
+                cen_color[i]=layers[l_index[i]]->center_color;
+                e1_color[i]=layers[l_index[i]]->e[e1_index[i]]->color[layers[l_index[i]]];
+                e2_color[i]=layers[l_index[i]]->e[e2_index[i]]->color[layers[l_index[i]]];
+            }
+
+            
+            if(!direction) {
+                // 顺时针旋转
+                std::rotate(l_index.begin(), l_index.begin() + 1, l_index.end());
+                std::rotate(e1_index.begin(), e1_index.begin() + 1, e1_index.end());
+                std::rotate(e2_index.begin(), e2_index.begin() + 1, e2_index.end());
+            } else {
+                // 逆时针旋转
+                std::rotate(l_index.rbegin(), l_index.rbegin() + 1, l_index.rend());
+                std::rotate(e1_index.rbegin(), e1_index.rbegin() + 1, e1_index.rend());
+                std::rotate(e2_index.rbegin(), e2_index.rbegin() + 1, e2_index.rend());
+            } 
+
+            //更新颜色
+            for(int i=0;i<4;i++){
+                layers[l_index[i]]->center_color=cen_color[i];
+                layers[l_index[i]]->e[e1_index[i]]->color[layers[l_index[i]]]=e1_color[i];
+                layers[l_index[i]]->e[e2_index[i]]->color[layers[l_index[i]]]=e2_color[i];
+            }
+           
         }
 
         //按WCA标准旋转指定层，direction为true时逆时针，否则顺时针，isForward为前进标记
-        void rotateWCA(char layer, bool direction,bool isForward) {
-            
-            if (settings.layerMap.count(layer) > 0) {
+        void rotateWCA(char layer, bool direction, bool isForward) {
+            if (layer == 'X' || layer == 'Y' || layer == 'Z') { // 如果是整体旋转
+                rotateWholeCube(layer, direction);
+                display();
+                cout << "move:" << layer;
+                if (direction) cout << "\'";
+                cout << endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(settings.move_delay));
+            } else if (settings.layerMap.count(layer) > 0) { // 如果是单层旋转
                 rotate(settings.layerMap[layer], direction);
-                cout<<"move:"<<layer;
-                if(direction) cout<<"\'";
-                cout<<endl;
+                display();
+                cout << "move:" << layer;
+                if (direction) cout << "\'";
+                cout << endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(settings.move_delay));
             } else {
                 // 错误处理：无效的层
             }
 
             //前进操作
-            if(isForward){
+            if (isForward) {
                 //将操作存入操作栈
                 string step;
-                step+=layer;
-                if(direction)
-                    step+='\'';
+                step += layer;
+                if (direction)
+                    step += '\'';
 
                 st_back.push(step);
                 st.push(step);
 
-                while(!st_forward.empty()) st_forward.pop();
+                while (!st_forward.empty()) st_forward.pop();
             }
-
         }
+
 
         
         
@@ -260,7 +325,12 @@ class Cube{
 
         //判断公式是否合法
         bool isFormulaValid(const std::string& formula) {
-            std::unordered_set<std::string> validMoves = {"U", "U'", "U2", "D", "D'", "D2", "R", "R'", "R2", "L", "L'", "L2", "F", "F'", "F2", "B", "B'", "B2"};
+            std::unordered_set<std::string> validMoves = { 
+            "U", "U'", "U2","D", "D'","D2", 
+            "R", "R'", "R2", "L", "L'","L2",
+            "F", "F'", "F2", "B", "B'","B2",
+            "X", "X'", "X2", "Y", "Y'", "Y2", 
+            "Z", "Z'", "Z2"};
 
             size_t pos = 0;
             while(pos < formula.size()) {
@@ -322,14 +392,17 @@ class Cube{
 
         //重置魔方
         void resetCube(){
-            for(auto layer:layers){
-                for(auto edge:layer->e){
-                    edge->color[layer]=layer->center_color;
+            for(int i=0;i<6;i++){
+                layers[i]->center_color=colors[i];
+                for(auto edge:layers[i]->e){
+                    edge->color[layers[i]]=colors[i];
                 }
-                for(auto corner:layer->c){
-                    corner->color[layer]=layer->center_color;
+                for(auto corner:layers[i]->c){
+                    corner->color[layers[i]]=colors[i];
                 }
             }
+            
+
             while(!st_back.empty())st_back.pop();
             while(!st_forward.empty())st_forward.pop();
             while(!st.empty())st.pop();
@@ -466,7 +539,7 @@ class Cube{
             //清空
             cout << "\033c";
 
-            cout<<"\n[*]v-cube  --made by "<<"\033[34m"<<"xz"<<"\033[0m"<<"(github name:"<<"\033[34m"<<"666xz666"<<"\033[0m"<<")\n"<<endl;
+            cout<<"\n[*]v-cube  --made by "<<"\033[34m"<<"xz"<<"\033[0m]\n"<<"(github name:"<<"\033[34m"<<"666xz666"<<"\033[0m"<<")\n"<<endl;
 
             int j=0;
             cout <<"      "; displayColor(layers[j]->c[2]->color[layers[j]]); cout << " "; displayColor(layers[j]->e[2]->color[layers[j]]); cout << " "; displayColor(layers[j]->c[1]->color[layers[j]]); cout << "\n";
@@ -496,6 +569,8 @@ class Cube{
             // std::this_thread::sleep_for(std::chrono::milliseconds(settings.move_delay));
         }
 
+    
+
 
         //test code
         // stack<string> getSt(){
@@ -508,6 +583,11 @@ class Cube{
 
 // int main() {
 //     //test
-
+//     Cube cube;
+//     cube.move("R U F");
+  
+//     cube.display();
+//     //cube.move("U F");
 //     return 0;
+//     //end test
 // }

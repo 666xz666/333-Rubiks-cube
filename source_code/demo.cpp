@@ -162,8 +162,9 @@ class Cubedemo{
         }
 };
 
-int main(){
-    Cubedemo demo;
-    demo.mainProgram();
-    return 0;
-}
+
+// int main(){
+//     Cubedemo demo;
+//     demo.mainProgram();
+//     return 0;
+// }
