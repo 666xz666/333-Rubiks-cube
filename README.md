@@ -20,4 +20,6 @@ made by xz
 - `step forward`: Restore the recently revoked step
 - `exit`: Exit the program
 
+![image](https://github.com/666xz666/333-Rubiks-cube/blob/main/readme/formula_index.jpg)
+
 [Click to star](https://github.com/666xz666/333cube)
