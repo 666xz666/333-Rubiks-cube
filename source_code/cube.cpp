@@ -16,18 +16,23 @@ using namespace std;
 
 class Cube;class Edge;class Layer;
 
+//棱块类
 class Edge{
-    //棱块类
+    
     public:
         unordered_map<Layer*,char>color;
 };
+
+//角块类
 class Corner{
-    //角块类
+    
     public:
         unordered_map<Layer*,char>color;
 };
+
+//单层类
 class Layer{
-    //单层类
+    
     public:
         char center_color;//中心块颜色
         vector<Edge*>e;//棱块
@@ -48,12 +53,17 @@ class Layer{
             return -1;
         }
 };
+
+
+//魔方类
 class Cube{
     private:
+        //主体
         vector<Layer*> layers;
         vector<Edge*> edges;
         vector<Corner*> corners;
 
+        //操作栈
         stack<string>st_back;
         stack<string>st_forward;
         stack<string>st;
@@ -74,8 +84,10 @@ class Cube{
             }
 
             // 预定义棱块和角块的顺序
-            vector<vector<int>> edge_order   = {{0, 1, 2, 3},{11, 7, 3, 6}, {8, 4, 0, 7}, {9, 5, 1, 4}, {10, 6, 2, 5},  { 10, 9, 8,11}};
-            vector<vector<int>> corner_order = {{0, 1, 2, 3},{7, 3, 2, 6}, {4, 0, 3, 7}, {5, 1, 0, 4}, {6, 2, 1, 5},  {5, 4, 7, 6}};
+            vector<vector<int>> edge_order   = {{0, 1, 2, 3},{11, 7, 3, 6},
+             {8, 4, 0, 7}, {9, 5, 1, 4},{10, 6, 2, 5},{ 10, 9, 8,11}};
+            vector<vector<int>> corner_order = {{0, 1, 2, 3},{7, 3, 2, 6},
+             {4, 0, 3, 7},{5, 1, 0, 4},{6, 2, 1, 5},{5, 4, 7, 6}};
 
             layers.resize(6);
             for(int i = 0; i < 6; ++i) {
@@ -107,11 +119,13 @@ class Cube{
 
         //旋转指定层，direction为true时逆时针，否则顺时针
         void rotate(int i, bool direction) {
+            if(i>=0&&i<6){//单层
             // 获取要旋转的层
             Layer* layer = layers[i];
 
             // 创建临时数组来存储棱块和角块的颜色
-            vector<char> corner_colors_u(4),edge_colors(4), corner_colors_l(4),corner_colors_r(4),edge_colors_u(4);
+            vector<char> corner_colors_u(4),edge_colors(4),
+             corner_colors_l(4),corner_colors_r(4),edge_colors_u(4);
             for(int j = 0; j < 4; ++j) {
                 edge_colors_u[j] = layer->e[j]->color[layer];
                 edge_colors[j] = layer->e[j]->color[layer->l[j]];
@@ -163,13 +177,37 @@ class Cube{
                 layer->e[j]->color.clear();
                 layer->c[j]->color.clear();
                 
-                layer->e[j]->color[layer->l[j]]       = edge_colors    [(j + (direction ? 3 : 1)) % 4];
-                layer->e[j]->color[layer]             = edge_colors_u  [(j + (direction ? 3 : 1)) % 4];
-                layer->c[j]->color[layer]             = corner_colors_u[(j + (direction ? 3 : 1)) % 4];
-                layer->c[j]->color[layer->l[j]]       = corner_colors_l[(j + (direction ? 3 : 1)) % 4];
-                layer->c[j]->color[layer->l[(j+1)%4]] = corner_colors_r[(j + (direction ? 3 : 1)) % 4];
+                layer->e[j]->color[layer->l[j]]       =
+                 edge_colors    [(j + (direction ? 3 : 1)) % 4];
+                layer->e[j]->color[layer]             =
+                 edge_colors_u  [(j + (direction ? 3 : 1)) % 4];
+                layer->c[j]->color[layer]             =
+                 corner_colors_u[(j + (direction ? 3 : 1)) % 4];
+                layer->c[j]->color[layer->l[j]]       =
+                 corner_colors_l[(j + (direction ? 3 : 1)) % 4];
+                layer->c[j]->color[layer->l[(j+1)%4]] =
+                 corner_colors_r[(j + (direction ? 3 : 1)) % 4];
+            }
+            }else if(i>=6&&i<9){ //中间层
+                //单层反向
+                rotate(settings.middleLayerMap[i],!direction);
+                //双层同向
+                rotate(settings.middleLayerMap[i]+9,direction);
+            }else{               //双层
+                //对层同方向旋转
+                rotate(settings.faceToMap[i-9],direction);
+        
+                //整体旋转
+                if(i==9||i==12||i==11){
+                    rotateWholeCube(settings.axisMap[i-9],direction);
+                
+                }else{
+                    rotateWholeCube(settings.axisMap[i-9],!direction);
+                
+                }
             }
             //display();交给rotateWCA函数显示
+
         }
 
         // 旋转整个魔方
@@ -178,21 +216,21 @@ class Cube{
             vector<int> l_index(4),e1_index(4),e2_index(4);
             vector<char> cen_color(4),e1_color(4),e2_color(4);
             switch(axis) {
-                case 'X': 
+                case 'x': 
                     rotate(1, !direction);
                     rotate(3, direction);
                     l_index = {5,2,0,4}; 
                     e1_index={0,0,0,2};
                     e2_index={2,2,2,0};
                     break;
-                case 'Y': 
+                case 'y': 
                     rotate(0, direction);
                     rotate(5, !direction);
                     l_index = {4,3,2,1}; 
                     e1_index={1,1,1,1};
                     e2_index={3,3,3,3};
                     break;
-                case 'Z': 
+                case 'z': 
                     rotate(2, direction);
                     rotate(4, !direction);
                     display();
@@ -205,8 +243,10 @@ class Cube{
             //保存颜色
             for(int i=0;i<4;i++){
                 cen_color[i]=layers[l_index[i]]->center_color;
-                e1_color[i]=layers[l_index[i]]->e[e1_index[i]]->color[layers[l_index[i]]];
-                e2_color[i]=layers[l_index[i]]->e[e2_index[i]]->color[layers[l_index[i]]];
+                e1_color[i]=
+                layers[l_index[i]]->e[e1_index[i]]->color[layers[l_index[i]]];
+                e2_color[i]=
+                layers[l_index[i]]->e[e2_index[i]]->color[layers[l_index[i]]];
             }
 
             
@@ -233,7 +273,7 @@ class Cube{
 
         //按WCA标准旋转指定层，direction为true时逆时针，否则顺时针，isForward为前进标记
         void rotateWCA(char layer, bool direction, bool isForward) {
-            if (layer == 'X' || layer == 'Y' || layer == 'Z') { // 如果是整体旋转
+            if (layer == 'x' || layer == 'y' || layer == 'z') { // 如果是整体旋转
                 rotateWholeCube(layer, direction);
                 display();
                 cout << "move:" << layer;
@@ -329,8 +369,13 @@ class Cube{
             "U", "U'", "U2","D", "D'","D2", 
             "R", "R'", "R2", "L", "L'","L2",
             "F", "F'", "F2", "B", "B'","B2",
-            "X", "X'", "X2", "Y", "Y'", "Y2", 
-            "Z", "Z'", "Z2"};
+            "x", "x'", "x2", "y", "y'", "y2", 
+            "z", "z'", "z2","M", "M'", "M2",
+            "E", "E'", "E2","S", "S'", "S2",
+            "u", "u'", "u2","d", "d'","d2",
+            "r", "r'", "r2", "l", "l'","l2",
+            "f", "f'", "f2", "b", "b'","b2"
+            };
 
             size_t pos = 0;
             while(pos < formula.size()) {
@@ -358,7 +403,8 @@ class Cube{
 
         //随机生成打乱公式
         string generateScramble() {
-            std::string moves[12] = {"U", "U'", "U2", "D", "D'", "D2", "R", "R'", "R2", "L", "L'", "L2"};
+            std::string moves[12] = {"U", "U'", "U2", "D", "D'", "D2",
+                                     "R", "R'", "R2", "L", "L'", "L2"};
             std::string scramble = "";
             std::random_device rd;
             std::mt19937 gen(rd());
@@ -402,7 +448,6 @@ class Cube{
                 }
             }
             
-
             while(!st_back.empty())st_back.pop();
             while(!st_forward.empty())st_forward.pop();
             while(!st.empty())st.pop();
@@ -423,9 +468,10 @@ class Cube{
                     //顺时针
                     rotateWCA(step_reverse[0],false,false);
                 }
-
-                st_back.push(step_reverse);
             }
+            //清空所有操作栈
+            while(!st_forward.empty())st_forward.pop();
+            while(!st_back.empty())st_back.pop();
 
             display();
         }
