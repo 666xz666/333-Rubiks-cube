@@ -9,6 +9,10 @@
 #include <random>
 #include<stack>
 #include <cctype>
+#include <array>
+#include <memory>
+#include <filesystem>
+#include "include/json.hpp"
 
 
 #include"settings.cpp"
@@ -342,7 +346,59 @@ class Cube{
             return output;
         }
 
+      
+
+
+
+
     public:
+
+          //利用python脚本从Algdb获取公式
+        vector<string> generateAlgdbFormulas(string& type,string& caseName){
+           
+            std::filesystem::path currentFilePath(__FILE__);
+            std::filesystem::path currentDir = currentFilePath.parent_path();
+            std::filesystem::path pythonFilePath = currentDir / "algdb.py";
+
+            std::string command = "python ";
+            command += pythonFilePath.string();
+            command+= " get_algs ";
+            command+= type;
+
+            // 创建一个管道并运行命令
+            std::array<char, 128> buffer;
+            std::string result;
+            std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
+            if (!pipe) {
+                throw std::runtime_error("popen() failed!");
+            }
+            while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+                result += buffer.data();
+            }
+
+            std::string jsonString = result;
+
+            nlohmann::json jsonArray = nlohmann::json::parse(jsonString);
+
+            // 现在 jsonArray 是一个包含多个 JSON 对象的数组
+            for (nlohmann::json& j : jsonArray) {
+                // 你可以像操作普通 C++ 对象一样操作每个 JSON 对象
+                
+                if(j["name"]==caseName){
+                    // 你可以像操作普通 C++ 对象一样操作每个 JSON 对象
+                    auto jsonAlgArray = j["caseAlgs"];
+                    vector<string>algList;
+                    for (nlohmann::json& alg : jsonAlgArray) {
+                        std::string algValue = alg["moves"];
+
+                        algList.push_back(algValue);
+                    }
+                    return algList;
+                }
+            }
+
+            return {};
+        }
         
         virtual ~Cube(){
             for(auto layer:layers){
@@ -630,10 +686,16 @@ class Cube{
 // int main() {
 //     //test
 //     Cube cube;
-//     cube.move("R U F");
-  
-//     cube.display();
-//     //cube.move("U F");
+
+//     string type = "pll";
+//     string caseName = "Aa";
+//     vector<string>algList=cube.generateAlgdbFormulas(type,caseName);
+//     for(auto alg:algList){
+//         cout<<alg<<endl;
+//     }
+    
+//     cube.move(algList[0]);
+
 //     return 0;
 //     //end test
 // }
